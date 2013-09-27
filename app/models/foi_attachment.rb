@@ -371,5 +371,16 @@ class FoiAttachment < ActiveRecord::Base
         return html, wrapper_id
     end
 
+    def icon_name
+        content_type = self.content_type.sub '/', '_'
+        leafname = "icon_#{content_type}_large.png"
+        expected_filename =  File.expand_path(Rails.root.join('app', 'assets', 'images', leafname))
+        if File.exist? expected_filename
+            leafname
+        else
+            "icon_unknown.png"
+        end
+    end
+
 end
 
