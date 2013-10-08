@@ -110,7 +110,8 @@ module Alaveteli
                                  'print.css',
                                  'admin.css',
                                  'ie6.css',
-                                 'ie7.css']
+                                 'ie7.css',
+                                 'admin.css']
 
   end
 end
