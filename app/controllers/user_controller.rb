@@ -35,6 +35,11 @@ class UserController < ApplicationController
             @show_profile = false
             @show_requests = true
             @show_batches = true
+        elsif params[:view] == 'annotations'
+            @show_profile = false
+            @show_requests = false
+            @show_annotations = true
+            @show_batches = false
         end
 
         @display_user = User.find(:first, :conditions => [ "url_name = ? and email_confirmed = ?", params[:url_name], true ])
@@ -47,7 +52,7 @@ class UserController < ApplicationController
 
         # Use search query for this so can collapse and paginate easily
         # XXX really should just use SQL query here rather than Xapian.
-        if @show_requests
+        if @show_requests || @show_annotations
             begin
                 requests_query = 'requested_by:' + @display_user.url_name
                 comments_query = 'commented_by:' + @display_user.url_name
