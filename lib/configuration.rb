@@ -48,6 +48,7 @@ module AlaveteliConfiguration
             :MINIMUM_REQUESTS_FOR_STATISTICS => 100,
             :MAX_REQUESTS_PER_USER_PER_DAY => '',
             :MTA_LOG_TYPE => 'exim',
+            :NEW_LOOK => false,
             :NEW_RESPONSE_REMINDER_AFTER_DAYS => [3, 10, 24],
             :OVERRIDE_ALL_PUBLIC_BODY_REQUEST_EMAILS => '',
             :PUBLIC_BODY_STATISTICS_PAGE => false,
