@@ -38,7 +38,7 @@
         <% if @no_crawl %>
             <meta name="robots" content="noindex, nofollow">
         <% end %>
-
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <%= render :partial => 'general/before_head_end' %>
     </head>
     <body class="<%= 'front' if params[:action] == 'frontpage' %>">
