@@ -270,6 +270,8 @@ GEM
     xapian-full-alaveteli (1.2.9.5)
     xml-simple (1.1.2)
     zip (2.0.2)
+    zurb-foundation (4.3.2)
+      sass (>= 3.2.0)
 
 PLATFORMS
   ruby
@@ -331,3 +333,4 @@ DEPENDENCIES
   xapian-full-alaveteli (~> 1.2.9.5)
   xml-simple
   zip
+  zurb-foundation
