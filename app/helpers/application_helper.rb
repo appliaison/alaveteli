@@ -136,5 +136,42 @@ module ApplicationHelper
             nil
         end
     end
+
+    def track_set_notices(track_thing, user)
+        notices = []
+        if user.receive_email_alerts
+            notices << track_thing.params[:subscribe_email]
+            notices << view_context.link_to(_('Prefer not to receive emails?'),
+                               show_user_wall_path(:url_name => user.url_name))
+        else
+            wall_url_user = show_user_wall_path(:url_name => track_thing.tracking_user.url_name)
+            notices << case track_thing.track_type
+            when 'request_updates'
+                _("You are now <a href=\"{{wall_url_user}}\">following</a> updates about '{{link_to_request}}', a request.",
+                    :link_to_request => request_link(track_thing.info_request),
+                    :wall_url_user => wall_url_user)
+            when 'all_new_requests'
+                _("You are now <a href=\"{{wall_url_user}}\">following</a> updates about <a href=\"/list\">new requests</a>",
+                    :wall_url_user => wall_url_user)
+            when 'all_successful_requests'
+                _("You are now <a href=\"{{wall_url_user}}\">following</a> updates about <a href=\"/list/successful\">successful requests</a>",
+                    :wall_url_user => wall_url_user)
+            when 'public_body_updates'
+                _("You are now <a href=\"{{wall_url_user}}\">following</a> updates about '{{link_to_authority}}', a public authority",
+                    :wall_url_user => wall_url_user,
+                    :link_to_authority => public_body_link(track_thing.public_body))
+            when 'user_updates'
+                _("You are now <a href=\"{{wall_url_user}}\">following</a> updates about '{{link_to_user}}', a person",
+                    :wall_url_user => wall_url_user,
+                    :link_to_user => user_link(track_thing.tracked_user))
+            when 'search_query'
+                _("You are now <a href=\"{{wall_url_user}}\">following</a> updates about '{{link_to_search}}'",
+                    :wall_url_user => wall_url_user,
+                    :link_to_search => search_link)
+
+            end
+        end
+        notices
+    end
 end
 

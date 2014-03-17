@@ -19,7 +19,7 @@ module LinkToHelper
     end
 
     def request_link(info_request, cls=nil )
-        link_to h(info_request.title), request_path(info_request), :class => cls
+        link_to info_request.title, request_path(info_request), :class => cls
     end
 
     def request_details_path(info_request)
@@ -75,15 +75,15 @@ module LinkToHelper
     end
 
     def public_body_link_short(public_body)
-        link_to h(public_body.short_or_long_name), public_body_path(public_body)
+        link_to public_body.short_or_long_name, public_body_path(public_body)
     end
 
     def public_body_link(public_body, cls=nil)
-        link_to h(public_body.name), public_body_path(public_body), :class => cls
+        link_to public_body.name, public_body_path(public_body), :class => cls
     end
 
     def public_body_link_absolute(public_body) # e.g. for in RSS
-        link_to h(public_body.name), public_body_url(public_body)
+        link_to public_body.name, public_body_url(public_body)
     end
 
     # Users
@@ -96,19 +96,19 @@ module LinkToHelper
     end
 
     def user_link(user, cls=nil)
-        link_to h(user.name), user_path(user), :class => cls
+        link_to user.name, user_path(user), :class => cls
     end
 
     def user_link_for_request(request, cls=nil)
         if request.is_external?
             user_name = request.external_user_name || _("Anonymous user")
             if !request.external_url.nil?
-                link_to h(user_name), request.external_url
+                link_to user_name, request.external_url
             else
                 user_name
             end
         else
-            link_to h(request.user.name), user_path(request.user), :class => cls
+            link_to request.user.name, user_path(request.user), :class => cls
         end
     end
 
@@ -159,17 +159,17 @@ module LinkToHelper
 
     def user_or_you_link(user)
         if @user && user == @user
-            link_to h("you"), user_path(user)
+            link_to _("you"), user_path(user)
         else
-            link_to h(user.name), user_path(user)
+            link_to user.name, user_path(user)
         end
     end
 
     def user_or_you_capital(user)
         if @user && user == @user
-            return h("You")
+            return "You"
         else
-            return h(user.name)
+            return user.name
         end
     end
 
@@ -237,7 +237,7 @@ module LinkToHelper
     end
 
     def search_link(query)
-        link_to h(query), search_url(query)
+        link_to query, search_url(query)
     end
 
     # Deprecated helper

@@ -10,7 +10,7 @@ module XapianQueries
         varieties = []
         if params[:request_variety] && !(query =~ /variety:/)
             if params[:request_variety].include? "sent"
-                varieties -= ['variety:sent', 'variety:followup_sent', 'variety:response', 'variety:comment']
+                # varieties -= ['variety:sent', 'variety:followup_sent', 'variety:response', 'variety:comment']
                 varieties << ['variety:sent', 'variety:followup_sent']
             end
             if params[:request_variety].include? "response"

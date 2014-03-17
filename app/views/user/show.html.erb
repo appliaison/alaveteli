@@ -224,7 +224,23 @@
                 <li>
                     <%= form_tag({:controller => 'track', :action => 'update', :track_id => track_thing.id}, :class => "feed_form") do %>
                         <div>
-                            <%= track_thing.params[:list_description] %>
+                            <% if track_thing.track_type == 'search_query' %>
+                            <%= track_thing.track_query %>
+                              <% if ! track_thing.track_query_description[:search].empty? %><%= _("Keywords: '{{search}}'", :search =>  track_thing.track_query_description[:search]) %><% end %>
+                              <% if ! track_thing.track_query_description[:filters].empty? %>
+                              <br><%= _("Search in:") %>
+                              <ul>
+                              <% track_thing.track_query_description[:filters].each do |filter| %>
+                              <li><%= filter %></li>
+                              <% end %>
+                             </ul>
+
+                              <% end %>
+                              <%= link_to("see it ", "/search/" + CGI.escapeHTML(track_thing.track_query) + "/newest/advanced") %>
+
+                            <% else %>
+                              <%= track_thing.params[:list_description] %>
+                            <% end %>
                             <%= hidden_field_tag 'track_medium', "delete", { :id => 'track_medium_' + track_thing.id.to_s } %>
                             <%= hidden_field_tag 'r', request.fullpath, { :id => 'r_' + track_thing.id.to_s }  %>
                             <%= submit_tag _('unsubscribe') %>
