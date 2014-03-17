@@ -27,6 +27,10 @@ describe TrackHelper do
             unsubscribe_notice(@track_thing).should == "You are no longer following <a href=\"/search/Example%20Query/newest/advanced\">this search</a>"
         end
 
+        it 'should create a description of the track' do
+            track_description(@track_thing).should == "<a href=\"/search/Example%20Query/newest/advanced\">anything matching text 'Example Query'</a>"
+        end
+
     end
 
     describe 'when displaying notices for a user track' do
@@ -49,6 +53,10 @@ describe TrackHelper do
 
         it 'should create an unsubscribe notice' do
             unsubscribe_notice(@track_thing).should == "You are no longer following '#{user_link(@track_thing.tracked_user)}', a person"
+        end
+
+        it 'should create a description of the track' do
+            track_description(@track_thing).should == "'#{user_link(@track_thing.tracked_user)}', a person"
         end
 
     end
@@ -74,6 +82,10 @@ describe TrackHelper do
         it 'should create an unsubscribe notice' do
             unsubscribe_notice(@track_thing).should == "You are no longer following '#{public_body_link(@track_thing.public_body)}', a public authority"
         end
+
+        it 'should create a description of the track' do
+            track_description(@track_thing).should == "'#{public_body_link(@track_thing.public_body)}', a public authority"
+        end
     end
 
     describe 'when displaying notices for a successful request track' do
@@ -98,6 +110,9 @@ describe TrackHelper do
             unsubscribe_notice(@track_thing).should == 'You are no longer following <a href="/list/successful">successful requests</a>'
         end
 
+        it 'should create a description of the track' do
+            track_description(@track_thing).should == '<a href="/list/successful">successful requests</a>'
+        end
     end
 
     describe 'when displaying notices for a new request track' do
@@ -122,6 +137,10 @@ describe TrackHelper do
             unsubscribe_notice(@track_thing).should == 'You are no longer following <a href="/list">new requests</a>'
         end
 
+        it 'should create a description of the track' do
+            track_description(@track_thing).should == '<a href="/list">new requests</a>'
+        end
+
     end
 
     describe 'when displaying notices for a request update track' do
@@ -144,6 +163,10 @@ describe TrackHelper do
 
         it 'should create an unsubscribe notice' do
             unsubscribe_notice(@track_thing).should == "You are no longer following '#{request_link(@track_thing.info_request)}', a request"
+        end
+
+        it 'should create a description of the track' do
+            track_description(@track_thing).should == "'#{request_link(@track_thing.info_request)}', a request"
         end
 
     end
