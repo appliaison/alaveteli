@@ -308,7 +308,7 @@ class FoiAttachment < ActiveRecord::Base
     private
 
     def google_docs_viewer
-        ret = "<html><head></head><body>"
+        ret = "<html><head>#{ display_filename }</head><body>"
         if has_google_docs_viewer?
             wrapper_id = "wrapper_google_embed"
             protocol = AlaveteliConfiguration::force_ssl ? 'https' : 'http'
