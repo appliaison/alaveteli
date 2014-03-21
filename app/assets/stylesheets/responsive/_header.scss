@@ -74,6 +74,7 @@
 
 }
 
+
 #topnav{
     padding: 0  0 1em 0;
     @media( min-width: $main_menu-mobile_menu_cutoff ){
@@ -189,7 +190,6 @@
     @media( min-width: $main_menu-mobile_menu_cutoff ){
         display:block;
         @include grid-column(6);
-        padding: 1em 2em;
     }
 
     #user_locale_switcher {
