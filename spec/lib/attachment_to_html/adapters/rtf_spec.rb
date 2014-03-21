@@ -33,20 +33,33 @@ describe AttachmentToHTML::Adapters::RTF do
 
     describe :to_html do
 
+        it 'should be a valid html document' do
+            parsed = Nokogiri::HTML.parse(rtf_adapter.to_html) do |config|
+               config.strict
+            end
+            parsed.errors.any?.should be_false
+        end
+
         it 'contains the attachment filename in the title tag' do
-            parsed = Nokogiri::HTML.parse(rtf_adapter.to_html)
+            parsed = Nokogiri::HTML.parse(rtf_adapter.to_html) do |config|
+               config.strict
+            end
             parsed.css('head title').inner_html.should == attachment.display_filename
         end
 
         it 'contains the wrapper div in the body tag' do
             rtf_adapter = AttachmentToHTML::Adapters::RTF.new(attachment, :wrapper => 'wrap')
-            parsed = Nokogiri::HTML.parse(rtf_adapter.to_html)
+            parsed = Nokogiri::HTML.parse(rtf_adapter.to_html) do |config|
+               config.strict
+            end
             parsed.css('body div').first.attributes['id'].value.should == 'wrap'
         end
 
         it 'contains the attachment body in the wrapper div' do
             rtf_adapter = AttachmentToHTML::Adapters::RTF.new(attachment, :wrapper => 'wrap')
-            parsed = Nokogiri::HTML.parse(rtf_adapter.to_html)
+            parsed = Nokogiri::HTML.parse(rtf_adapter.to_html) do |config|
+               config.strict
+            end
             parsed.css('div#wrap').inner_text.should include('thisisthebody')
         end
 
@@ -73,7 +86,8 @@ describe AttachmentToHTML::Adapters::RTF do
         end
 
         it 'is not successful if the body has no content other than tags' do
-            attachment = FactoryGirl.build(:body_text, :body => '')
+            empty_rtf = load_file_fixture('empty.rtf')
+            attachment = FactoryGirl.build(:rtf_attachment, :body => empty_rtf)
             rtf_adapter = AttachmentToHTML::Adapters::RTF.new(attachment)
             rtf_adapter.to_html
             rtf_adapter.success?.should be_false

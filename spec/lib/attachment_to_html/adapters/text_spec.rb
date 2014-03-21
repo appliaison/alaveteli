@@ -20,39 +20,51 @@ describe AttachmentToHTML::Adapters::Text do
 
     describe :to_html do
 
-        it 'looks roughly like a html document' do
-            htmlish = /<!DOCTYPE html>.*<html.*>.*<head>.*<title>.*<\/title>.*<\/head>.*<body.*>.*<\/body>.*<\/html>/im
-            text_adapter.to_html.should match(htmlish)
+        it 'should be a valid html document' do
+            parsed = Nokogiri::HTML.parse(text_adapter.to_html) do |config|
+               config.strict
+            end
+            parsed.errors.any?.should be_false
         end
 
         it 'contains the attachment filename in the title tag' do
-            parsed = Nokogiri::HTML.parse(text_adapter.to_html)
+            parsed = Nokogiri::HTML.parse(text_adapter.to_html) do |config|
+                config.strict
+            end
             parsed.css('title').inner_html.should == attachment.display_filename
         end
 
         it 'contains the wrapper div in the body tag' do
             text_adapter = AttachmentToHTML::Adapters::Text.new(attachment, :wrapper => 'wrap')
-            parsed = Nokogiri::HTML.parse(text_adapter.to_html)
+            parsed = Nokogiri::HTML.parse(text_adapter.to_html) do |config|
+                config.strict
+            end
             parsed.css('body').children.first.attributes['id'].value.should == 'wrap'
         end
 
         it 'contains the attachment body in the wrapper div' do
             text_adapter = AttachmentToHTML::Adapters::Text.new(attachment, :wrapper => 'wrap')
-            parsed = Nokogiri::HTML.parse(text_adapter.to_html)
+            parsed = Nokogiri::HTML.parse(text_adapter.to_html) do |config|
+                config.strict
+            end
             parsed.css('div#wrap').inner_html.should == attachment.body
         end
  
         it 'strips the body of trailing whitespace' do
             attachment = FactoryGirl.build(:body_text, :body => ' Hello ')
             text_adapter = AttachmentToHTML::Adapters::Text.new(attachment)
-            parsed = Nokogiri::HTML.parse(text_adapter.to_html)
+            parsed = Nokogiri::HTML.parse(text_adapter.to_html) do |config|
+                config.strict
+            end
             parsed.css('div#wrapper').inner_html.should == 'Hello'
         end
 
         it 'escapes special characters' do
             attachment = FactoryGirl.build(:body_text, :body => 'Usage: foo "bar" >baz<')
             text_adapter = AttachmentToHTML::Adapters::Text.new(attachment)
-            parsed = Nokogiri::HTML.parse(text_adapter.to_html)
+            parsed = Nokogiri::HTML.parse(text_adapter.to_html) do |config|
+                config.strict
+            end
             expected = %Q(Usage: foo &quot;bar&quot; &gt;baz&lt;)
             parsed.css('div#wrapper').inner_html.should == expected
         end
@@ -60,7 +72,9 @@ describe AttachmentToHTML::Adapters::Text do
         it 'creates hyperlinks for text that looks like a url' do
             attachment = FactoryGirl.build(:body_text, :body => 'http://www.whatdotheyknow.com')
             text_adapter = AttachmentToHTML::Adapters::Text.new(attachment)
-            parsed = Nokogiri::HTML.parse(text_adapter.to_html)
+            parsed = Nokogiri::HTML.parse(text_adapter.to_html) do |config|
+                config.strict
+            end
             parsed.css('div#wrapper a').first.text.should == 'http://www.whatdotheyknow.com'
             parsed.css('div#wrapper a').first['href'].should == 'http://www.whatdotheyknow.com'
         end
@@ -68,7 +82,9 @@ describe AttachmentToHTML::Adapters::Text do
         it 'substitutes newlines for br tags' do
             attachment = FactoryGirl.build(:body_text, :body => "A\nNewline")
             text_adapter = AttachmentToHTML::Adapters::Text.new(attachment)
-            parsed = Nokogiri::HTML.parse(text_adapter.to_html)
+            parsed = Nokogiri::HTML.parse(text_adapter.to_html) do |config|
+                config.strict
+            end
             expected = %Q(A<br>Newline)
             parsed.css('div#wrapper').inner_html.should == expected
         end
@@ -90,7 +106,8 @@ describe AttachmentToHTML::Adapters::Text do
         end
 
         it 'is not successful if the body has no content other than tags' do
-            attachment = FactoryGirl.build(:body_text, :body => '')
+            empty_txt = load_file_fixture('empty.txt')
+            attachment = FactoryGirl.build(:body_text, :body => empty_txt)
             text_adapter = AttachmentToHTML::Adapters::Text.new(attachment)
             text_adapter.to_html
             text_adapter.success?.should be_false

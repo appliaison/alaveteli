@@ -36,10 +36,15 @@ module AttachmentToHTML
             private
 
             def generate_html
-                html = Nokogiri::HTML.parse(convert)
-                inject_title(html)
-                inject_wrapper(html)
-                html.to_html
+                html =  "<!DOCTYPE html>"
+                html += "<html>"
+                html += "<head>"
+                html += "<title>#{ title }</title>"
+                html += "</head>"
+                html += "<body>"
+                html += "<div id=\"#{ wrapper }\">#{ body }</div>"
+                html += "</body>"
+                html += "</html>"
             end
 
             def title
@@ -47,13 +52,36 @@ module AttachmentToHTML
             end
 
             def body
-                attachment.body
+                parsed_body
+            end
+
+            # Parse the output of the converted attachment so that we can pluck
+            # the parts we need and insert in to our own sensible template
+            #
+            # Returns a Nokogiri::HTML::Document
+            def parsed
+                @parsed ||= Nokogiri::HTML.parse(convert)
+            end
+
+            def parsed_body
+                parsed.css('body').inner_html
+            end
+
+            # Does the body element have any content, excluding HTML tags?
+            #
+            # Returns a Boolean
+            def has_content?
+                !parsed.css('body').inner_text.empty?
+            end
+
+            def contains_images?
+                parsed.css('body img').any?
             end
 
             def convert
-                Dir.chdir(tmpdir) do
+                @converted ||= Dir.chdir(tmpdir) do
                     tempfile = create_tempfile
-                    write_body_to_tempfile(tempfile)
+                    write_attachment_body_to_tempfile(tempfile)
 
                     html = AlaveteliExternalCommand.run("pdftohtml",
                       "-nodrm", "-zoom", "1.0", "-stdout", "-enc", "UTF-8",
@@ -74,44 +102,14 @@ module AttachmentToHTML
                 end
             end
 
-            def write_body_to_tempfile(tempfile)
-                tempfile.print(body)
+            def write_attachment_body_to_tempfile(tempfile)
+                tempfile.print(attachment.body)
                 tempfile.flush
             end
 
             def cleanup_tempfile(tempfile)
                 tempfile.close
                 tempfile.delete
-            end
-
-            def inject_title(html)
-                html.title = title
-            end
-
-            def inject_wrapper(html)
-                html.css('body').wrap(wrapper_div)
-            end
-
-            def wrapper_div
-                %Q(<div id="#{ wrapper }"></div>)
-            end
-
-            # Does the body element have any content, excluding HTML tags?
-            #
-            # Returns a Boolean
-            def has_content?
-                !parsed.css('body').inner_text.empty?
-            end
-
-            def contains_images?
-                parsed.css('body img').any?
-            end
-
-            # Parse the output of to_html to check for success
-            #
-            # Returns a Nokogiri::HTML::Document
-            def parsed
-                @parsed ||= Nokogiri::HTML.parse(to_html)
             end
 
         end

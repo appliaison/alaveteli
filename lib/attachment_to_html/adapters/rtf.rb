@@ -36,10 +36,15 @@ module AttachmentToHTML
             private
 
             def generate_html
-                html = Nokogiri::HTML.parse(convert)
-                inject_title(html)
-                inject_wrapper(html)
-                html.to_html
+                html =  "<!DOCTYPE html>"
+                html += "<html>"
+                html += "<head>"
+                html += "<title>#{ title }</title>"
+                html += "</head>"
+                html += "<body>"
+                html += "<div id=\"#{ wrapper }\">#{ body }</div>"
+                html += "</body>"
+                html += "</html>"
             end
 
             def title
@@ -47,52 +52,19 @@ module AttachmentToHTML
             end
 
             def body
-                attachment.body
+                parsed_body
             end
 
-            def convert
-                Dir.chdir(tmpdir) do
-                    tempfile = create_tempfile
-                    write_body_to_tempfile(tempfile)
-
-                    html = AlaveteliExternalCommand.run("unrtf", "--html",
-                      tempfile.path, :timeout => 120
-                    )
-
-                    cleanup_tempfile(tempfile)
-
-                    html
-                end
+            # Parse the output of the converted attachment so that we can pluck
+            # the parts we need and insert in to our own sensible template
+            #
+            # Returns a Nokogiri::HTML::Document
+            def parsed
+                @parsed ||= Nokogiri::HTML.parse(convert)
             end
 
-            def create_tempfile
-                if RUBY_VERSION.to_f >= 1.9
-                    Tempfile.new('foiextract', '.', :encoding => text.encoding)
-                else
-                    Tempfile.new('foiextract', '.')
-                end
-            end
-
-            def write_body_to_tempfile(tempfile)
-                tempfile.print(body)
-                tempfile.flush
-            end
-
-            def cleanup_tempfile(tempfile)
-                tempfile.close
-                tempfile.delete
-            end
-
-            def inject_title(html)
-                html.title = title
-            end
-
-            def inject_wrapper(html)
-                html.css('body').wrap(wrapper_div)
-            end
-
-            def wrapper_div
-                %Q(<div id="#{ wrapper }"></div>)
+            def parsed_body
+                parsed.css('body').inner_html
             end
 
             # Does the body element have any content, excluding HTML tags?
@@ -106,11 +78,37 @@ module AttachmentToHTML
                 parsed.css('body img').any?
             end
 
-            # Parse the output of to_html to check for success
-            #
-            # Returns a Nokogiri::HTML::Document
-            def parsed
-                @parsed ||= Nokogiri::HTML.parse(to_html)
+            def convert
+                @converted ||= Dir.chdir(tmpdir) do
+                    tempfile = create_tempfile
+                    write_attachment_body_to_tempfile(tempfile)
+
+                    html = AlaveteliExternalCommand.run("unrtf", "--html",
+                      tempfile.path, :timeout => 120
+                    )
+
+                    cleanup_tempfile(tempfile)
+
+                    html
+                end
+            end
+
+            def create_tempfile
+                if RUBY_VERSION.to_f >= 1.9
+                    Tempfile.new('foiextract', '.', :encoding => attachment.body.encoding)
+                else
+                    Tempfile.new('foiextract', '.')
+                end
+            end
+
+            def write_attachment_body_to_tempfile(tempfile)
+                tempfile.print(attachment.body)
+                tempfile.flush
+            end
+
+            def cleanup_tempfile(tempfile)
+                tempfile.close
+                tempfile.delete
             end
 
         end

@@ -33,25 +33,33 @@ describe AttachmentToHTML::Adapters::PDF do
 
     describe :to_html do
 
-        it 'looks roughly like a html document' do
-            htmlish = /<!DOCTYPE html>.*<html.*>.*<head>.*<title>.*<\/title>.*<\/head>.*<body.*>.*<\/body>.*<\/html>/im
-            pdf_adapter.to_html.should match(htmlish)
+        it 'should be a valid html document' do
+            parsed = Nokogiri::HTML.parse(pdf_adapter.to_html) do |config|
+               config.strict
+            end
+            parsed.errors.any?.should be_false
         end
 
         it 'contains the attachment filename in the title tag' do
-            parsed = Nokogiri::HTML.parse(pdf_adapter.to_html)
+            parsed = Nokogiri::HTML.parse(pdf_adapter.to_html) do |config|
+               config.strict
+            end
             parsed.css('title').inner_html.should == attachment.display_filename
         end
 
         it 'contains the wrapper div in the body tag' do
             pdf_adapter = AttachmentToHTML::Adapters::PDF.new(attachment, :wrapper => 'wrap')
-            parsed = Nokogiri::HTML.parse(pdf_adapter.to_html)
+            parsed = Nokogiri::HTML.parse(pdf_adapter.to_html) do |config|
+               config.strict
+            end
             parsed.css('body div').first.attributes['id'].value.should == 'wrap'
         end
 
         it 'contains the attachment body in the wrapper div' do
             pdf_adapter = AttachmentToHTML::Adapters::PDF.new(attachment, :wrapper => 'wrap')
-            parsed = Nokogiri::HTML.parse(pdf_adapter.to_html)
+            parsed = Nokogiri::HTML.parse(pdf_adapter.to_html) do |config|
+               config.strict
+            end
             parsed.css('div#wrap').inner_html.should include('thisisthebody')
         end
 
@@ -78,6 +86,7 @@ describe AttachmentToHTML::Adapters::PDF do
         end
 
         it 'is not successful if the body has no content other than tags' do
+            # TODO: Add and use spec/fixtures/files/empty.pdf
             attachment = FactoryGirl.build(:body_text, :body => '')
             pdf_adapter = AttachmentToHTML::Adapters::PDF.new(attachment)
             pdf_adapter.to_html
